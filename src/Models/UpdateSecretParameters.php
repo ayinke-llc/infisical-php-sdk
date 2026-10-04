@@ -34,7 +34,7 @@ class UpdateSecretParameters
         }
 
         if ($this->projectId !== null) {
-            $params['workspaceId'] = $this->projectId;
+            $params['projectId'] = $this->projectId;
         }
         
         if ($this->secretPath !== null) {
@@ -51,10 +51,6 @@ class UpdateSecretParameters
 
         if ($this->newSecretKey !== null) {
             $params['newSecretName'] = $this->newSecretKey;
-        }
-
-        if ($this->secretKey !== null) {
-            $params['secretKey'] = $this->secretKey;
         }
 
         return $params;

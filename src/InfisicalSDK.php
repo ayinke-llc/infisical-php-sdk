@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Infisical\SDK;
 
 use Infisical\SDK\Services\SecretsService;
+use Infisical\SDK\Services\FoldersService;
 use Infisical\SDK\Services\AuthService;
 use Infisical\SDK\Http\HttpClient;
 
@@ -16,6 +17,7 @@ class InfisicalSDK
     private string $host;
     private HttpClient $httpClient;
     private SecretsService $secretsService;
+    private FoldersService $foldersService;
     private AuthService $authService;
 
     /**
@@ -29,6 +31,7 @@ class InfisicalSDK
         $this->httpClient = new HttpClient($host);
 
         $this->secretsService = new SecretsService($this->httpClient);
+        $this->foldersService = new FoldersService($this->httpClient);
         $this->authService = new AuthService($this->httpClient, fn(string $token) => $this->onAuthenticate($token));
     }
 
@@ -40,6 +43,14 @@ class InfisicalSDK
     public function secrets(): SecretsService
     {
         return $this->secretsService;
+    }
+
+    /**
+     * Get the folders service
+     */
+    public function folders(): FoldersService
+    {
+        return $this->foldersService;
     }
 
     /**
@@ -64,6 +75,7 @@ class InfisicalSDK
         );
 
         $this->secretsService = new SecretsService($this->httpClient);
+        $this->foldersService = new FoldersService($this->httpClient);
         $this->authService = new AuthService($this->httpClient, fn(string $token) => $this->onAuthenticate($token));
     }
 }

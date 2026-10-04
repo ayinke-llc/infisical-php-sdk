@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Infisical\SDK\Services;
 
-use Infisical\SDK\Models\Secret;
-use Infisical\SDK\Models\ListSecretsParameters;
 use Infisical\SDK\Http\HttpClient;
 use Infisical\SDK\Models\CreateSecretParameters;
 use Infisical\SDK\Models\DeleteSecretParameters;
 use Infisical\SDK\Models\GetSecretParameters;
+use Infisical\SDK\Models\ListSecretsParameters;
+use Infisical\SDK\Models\Secret;
 use Infisical\SDK\Models\UpdateSecretParameters;
 
 /**
@@ -27,31 +27,29 @@ class SecretsService
     /**
      * List secrets with optional filtering and pagination
      *
-     * @param  ListSecretsParameters|null $parameters Optional parameters for filtering and pagination
+     * @param  ListSecretsParameters|null  $parameters  Optional parameters for filtering and pagination
      * @return array<Secret> Array of Secret objects
      */
     public function list(?ListSecretsParameters $parameters = null): array
     {
-        $response = $this->httpClient->get('/api/v3/secrets/raw', $parameters?->toArray() ?? []);
+        $response = $this->httpClient->get('/api/v4/secrets', $parameters?->toArray() ?? []);
         $responseData = json_decode($response->getBody()->getContents(), true);
 
+        $secrets = array_map(fn ($data) => Secret::fromArray($data), $responseData['secrets'] ?? []);
 
-        $secrets = array_map(fn($data) => Secret::fromArray($data), $responseData['secrets'] ?? []);
-        
         // Ensure unique secrets by key before processing imports
         if ($parameters?->recursive) {
             $secrets = $this->ensureUniqueSecretsByKey($secrets, $parameters?->skipUniqueValidation ?? false);
         }
-        
 
         // Handle imports - imports take precedence over secrets
         if (isset($responseData['imports'])) {
             foreach ($responseData['imports'] as $importBlock) {
                 foreach ($importBlock['secrets'] as $importSecretData) {
                     $importSecret = Secret::fromArray($importSecretData);
-                    
+
                     // Only append if not already in the list (imports take precedence)
-                    if (!$this->containsSecret($secrets, $importSecret->secretKey)) {
+                    if (! $this->containsSecret($secrets, $importSecret->secretKey)) {
                         $secrets[] = $importSecret;
                     }
                 }
@@ -60,7 +58,7 @@ class SecretsService
 
         if ($parameters?->attachToProcessEnv) {
             foreach ($secrets as $secret) {
-                putenv($secret->secretKey . '=' . $secret->secretValue);
+                putenv($secret->secretKey.'='.$secret->secretValue);
             }
         }
 
@@ -70,7 +68,7 @@ class SecretsService
     /**
      * Get a single secret by key
      *
-     * @param  GetSecretParameters|null $parameters Optional parameters for filtering and pagination
+     * @param  GetSecretParameters|null  $parameters  Optional parameters for filtering and pagination
      * @return Secret The secret
      */
     public function get(?GetSecretParameters $parameters = null): Secret
@@ -78,9 +76,10 @@ class SecretsService
         if ($parameters?->secretKey === null) {
             throw new \InvalidArgumentException('secretKey is required');
         }
-        
-        $response = $this->httpClient->get('/api/v3/secrets/raw/' . urlencode($parameters->secretKey), $parameters->toArray());
+
+        $response = $this->httpClient->get('/api/v4/secrets/'.rawurlencode($parameters->secretKey), $parameters->toArray());
         $responseData = json_decode($response->getBody()->getContents(), true);
+
         return Secret::fromArray($responseData['secret'] ?? []);
     }
 
@@ -89,8 +88,8 @@ class SecretsService
         if ($parameters?->secretKey === null) {
             throw new \InvalidArgumentException('secretKey is required');
         }
-        
-        $response = $this->httpClient->patch('/api/v3/secrets/raw/' . urlencode($parameters->secretKey), $parameters->toArray());
+
+        $response = $this->httpClient->patch('/api/v4/secrets/'.rawurlencode($parameters->secretKey), $parameters->toArray());
         $responseData = json_decode($response->getBody()->getContents(), true);
 
         return Secret::fromArray($responseData['secret'] ?? []);
@@ -101,9 +100,10 @@ class SecretsService
         if ($parameters?->secretKey === null) {
             throw new \InvalidArgumentException('secretKey is required');
         }
-        
-        $response = $this->httpClient->delete('/api/v3/secrets/raw/' . urlencode($parameters->secretKey), $parameters->toArray());
+
+        $response = $this->httpClient->delete('/api/v4/secrets/'.rawurlencode($parameters->secretKey), $parameters->toArray());
         $responseData = json_decode($response->getBody()->getContents(), true);
+
         return Secret::fromArray($responseData['secret'] ?? []);
     }
 
@@ -112,14 +112,15 @@ class SecretsService
         if ($parameters?->secretKey === null) {
             throw new \InvalidArgumentException('secretKey is required');
         }
-        
-        $response = $this->httpClient->post('/api/v3/secrets/raw/' . urlencode($parameters->secretKey), $parameters->toArray());
+
+        $response = $this->httpClient->post('/api/v4/secrets/'.rawurlencode($parameters->secretKey), $parameters->toArray());
         $responseData = json_decode($response->getBody()->getContents(), true);
+
         return Secret::fromArray($responseData['secret'] ?? []);
     }
 
     /**
-     * @param Secret[] $secrets
+     * @param  Secret[]  $secrets
      */
     private function containsSecret(array $secrets, string $secretKey): bool
     {
@@ -128,11 +129,12 @@ class SecretsService
                 return true;
             }
         }
+
         return false;
     }
 
     /**
-     * @param  Secret[] $secrets
+     * @param  Secret[]  $secrets
      * @return Secret[]
      */
     private function ensureUniqueSecretsByKey(array $secrets, bool $skipUniqueValidation): array
@@ -143,7 +145,7 @@ class SecretsService
         foreach ($secrets as $secret) {
             if ($skipUniqueValidation) {
                 // Create a composite key using both secretPath and secretKey
-                $key = $secret->secretPath . ':' . $secret->secretKey;
+                $key = $secret->secretPath.':'.$secret->secretKey;
             } else {
                 // Use only secretKey for global uniqueness
                 $key = $secret->secretKey;
@@ -154,5 +156,4 @@ class SecretsService
         // Return array with unique secrets
         return array_values($secretMap);
     }
-
 }

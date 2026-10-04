@@ -32,8 +32,8 @@ class Secret
         return new self(
             $data['secretKey'] ?? '',
             $data['secretValue'] ?? '',
-            $data['id'] ?? '',
-            $data['workspaceId'] ?? '',
+            $data['id'] ?? $data['_id'] ?? '',
+            $data['workspace'] ?? $data['workspaceId'] ?? '',
             $data['environment'] ?? '',
             $data['version'] ?? 0,
             $data['type'] ?? '',

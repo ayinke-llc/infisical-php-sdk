@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace Infisical\SDK\Models;
 
 /**
- * Parameters for creating a secret
+ * Parameters for deleting a folder by ID or name
  */
-class CreateSecretParameters
+class DeleteFolderParameters
 {
     public function __construct(
+        public readonly ?string $folderIdOrName = null,
         public readonly ?string $environment = null,
         public readonly ?string $projectId = null,
-        public readonly ?string $secretPath = null,
-        public readonly ?string $secretKey = null,
-        public readonly ?string $secretValue = null,
-        public readonly ?string $secretComment = null,
+        public readonly ?string $path = null,
+        public readonly ?bool $forceDelete = null,
     ) {
     }
 
@@ -35,20 +34,15 @@ class CreateSecretParameters
         if ($this->projectId !== null) {
             $params['projectId'] = $this->projectId;
         }
-        
-        if ($this->secretPath !== null) {
-            $params['secretPath'] = $this->secretPath;
+
+        if ($this->path !== null) {
+            $params['path'] = $this->path;
         }
 
-        if ($this->secretValue !== null) {
-            $params['secretValue'] = $this->secretValue;
-        }
-
-        if ($this->secretComment !== null) {
-            $params['secretComment'] = $this->secretComment;
+        if ($this->forceDelete !== null) {
+            $params['forceDelete'] = $this->forceDelete;
         }
 
         return $params;
     }
-
 }

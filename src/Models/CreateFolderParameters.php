@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace Infisical\SDK\Models;
 
 /**
- * Parameters for creating a secret
+ * Parameters for creating a folder
  */
-class CreateSecretParameters
+class CreateFolderParameters
 {
     public function __construct(
         public readonly ?string $environment = null,
         public readonly ?string $projectId = null,
-        public readonly ?string $secretPath = null,
-        public readonly ?string $secretKey = null,
-        public readonly ?string $secretValue = null,
-        public readonly ?string $secretComment = null,
+        public readonly ?string $name = null,
+        public readonly ?string $path = null,
+        public readonly ?string $description = null,
     ) {
     }
 
@@ -35,20 +34,19 @@ class CreateSecretParameters
         if ($this->projectId !== null) {
             $params['projectId'] = $this->projectId;
         }
-        
-        if ($this->secretPath !== null) {
-            $params['secretPath'] = $this->secretPath;
+
+        if ($this->name !== null) {
+            $params['name'] = $this->name;
         }
 
-        if ($this->secretValue !== null) {
-            $params['secretValue'] = $this->secretValue;
+        if ($this->path !== null) {
+            $params['path'] = $this->path;
         }
 
-        if ($this->secretComment !== null) {
-            $params['secretComment'] = $this->secretComment;
+        if ($this->description !== null) {
+            $params['description'] = $this->description;
         }
 
         return $params;
     }
-
 }

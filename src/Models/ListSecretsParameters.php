@@ -42,7 +42,7 @@ class ListSecretsParameters
         }
         
         if ($this->projectId !== null) {
-            $params['workspaceId'] = $this->projectId;
+            $params['projectId'] = $this->projectId;
         }
         
         if ($this->expandSecretReferences !== null) {
@@ -57,16 +57,8 @@ class ListSecretsParameters
             $params['tagSlugs'] = implode(',', $this->tagSlugs);
         }
 
-        if ($this->attachToProcessEnv !== null) {
-            $params['attachToProcessEnv'] = $this->attachToProcessEnv;
-        }
-
-        if ($this->skipUniqueValidation !== null) {
-            $params['skipUniqueValidation'] = $this->skipUniqueValidation;
-        }
-
         // We forcefully include imports as we're trying to move to a structure where users won't have to worry about imports vs. secrets.
-        $params["include_imports"] = "true";
+        $params["includeImports"] = "true";
         
         return $params;
     }

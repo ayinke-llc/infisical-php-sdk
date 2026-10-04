@@ -29,16 +29,12 @@ class GetSecretParameters
     {
         $params = [];
 
-        if ($this->secretKey !== null) {
-            $params['secretKey'] = $this->secretKey;
-        }
-
         if ($this->environment !== null) {
             $params['environment'] = $this->environment;
         }
 
         if ($this->projectId !== null) {
-            $params['workspaceId'] = $this->projectId;
+            $params['projectId'] = $this->projectId;
         }
         
         if ($this->secretPath !== null) {
